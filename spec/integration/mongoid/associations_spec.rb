@@ -406,6 +406,28 @@ describe Mongoid::Associations do
           @person.reload.addresses.first.should == @address
         end
       end
+
+      context "when overwriting" do
+        before do
+          @person.addresses.build(:street => "Oxford St")
+          @person.addresses = @person.addresses
+        end
+
+        it "still recognizes the embedded document as a new record" do
+          @person.addresses.first.should be_new_record
+        end
+      end
+
+      context "when overwriting with nil" do
+        before do
+          @person.addresses = nil
+        end
+
+        it "sets the association to an empty array" do
+          @person.addresses.should == []
+        end
+      end
+
     end
 
     context "one level nested" do
@@ -439,6 +461,30 @@ describe Mongoid::Associations do
           @from_db.addresses.first.update_attributes(:city => "London")
           @from_db.addresses.should == [ @first, @second ]
         end
+
+        it "does not change the internal order of the attributes in the parent" do
+          @from_db.addresses.first.update_attributes(:city => "London")
+          @from_db.attributes["addresses"].should == [@first.attributes, @second.attributes]
+        end
+
+        context "updating an element that is a new record" do
+          before do
+            @third = Address.new(:street => "Foo")
+            @fourth = Address.new(:street => "Bar")
+            @from_db.addresses << @third
+            @from_db.addresses << @fourth
+          end
+
+          it "does not change the internal order of the array" do
+            @third.update_attributes(:city => "London")
+            @from_db.addresses.should == [ @first, @second, @third, @fourth ]
+          end
+
+          it "does not change the internal order of the attributes in the parent" do
+            @third.update_attributes(:city => "London")
+            @from_db.attributes["addresses"].should == [@first.attributes, @second.attributes, @third.attributes, @fourth.attributes]
+          end
+        end
       end
 
       describe "#first" do
@@ -470,6 +516,19 @@ describe Mongoid::Associations do
           @person.addresses.destroy_all(:conditions => { :street => "Oxford St" }).should == 1
           @person.addresses.size.should == 0
         end
+      end
+    end
+
+    context "embedded_in instantiated and added later to parent" do
+      before do
+        @address = Address.new
+        @person = Person.new
+      end
+
+      it "doesn't memoize a nil parent" do
+        @address.addressable
+        @person.addresses << @address
+        @address.addressable.should == @person
       end
     end
 
