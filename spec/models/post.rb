@@ -21,3 +21,10 @@ class Post
     end
   end
 end
+
+class LockablePost
+  include Mongoid::Document
+  include Mongoid::Locking
+
+  field :title
+end
