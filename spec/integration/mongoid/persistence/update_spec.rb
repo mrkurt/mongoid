@@ -7,7 +7,7 @@ describe Mongoid::Persistence::Update do
   end
 
   after do
-    Person.delete_all
+    #Person.delete_all
   end
 
   describe "#persist" do
@@ -40,6 +40,17 @@ describe Mongoid::Persistence::Update do
       it "returns true" do
         update = Mongoid::Persistence::Update.new(@person)
         update.persist.should == true
+      end
+    end
+
+    context "when the document selector matches no documents" do
+      before do
+        Person.find(person.id).destroy
+      end
+
+      it "raises an error" do
+        person.title = "Grand Poobah"
+        lambda{ person.update }.should raise_error(Mongoid::Errors::NoDocumentsChanged)
       end
     end
   end
