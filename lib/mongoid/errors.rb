@@ -120,5 +120,19 @@ module Mongoid #:nodoc
         "Accept Nested Attributes for #{@association} is limited to #{@limit} records"
       end
     end
+
+    # This error is raised when an update expects document changes
+    # but the database says nothing changed
+    class NoDocumentsChanged < RuntimeError
+      def initialize(selector, setters)
+        @selector = selector
+        @setters = setters
+      end
+
+      def message
+        "No documents were changed as a result of the update. " +
+          "Selector: #{@selector.inspect}, Setters: #{@setters.inspect}"
+      end
+    end
   end
 end
