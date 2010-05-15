@@ -164,7 +164,7 @@ describe Mongoid::Criteria do
   describe "#where" do
 
     before do
-      @person = Person.create(:title => "Sir", :age => 33, :aliases => ["D", "Durran"])
+      @person = Person.create(:title => "Sir", :age => 33, :aliases => ["D", "Durran"], :things => [{:phone => 'HTC Incredible'}])
     end
 
     context "with complex criterion" do
@@ -249,6 +249,14 @@ describe Mongoid::Criteria do
 
       end
 
+      context "#match" do
+
+        it "returns those matching a partial element in a list" do
+          Person.criteria.where(:things.match => {:phone => 'HTC Incredible'}).should == [@person]
+        end
+
+      end
+ 
     end
 
   end
