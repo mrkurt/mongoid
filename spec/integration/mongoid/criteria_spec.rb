@@ -256,7 +256,7 @@ describe Mongoid::Criteria do
         end
 
       end
- 
+
     end
 
   end
