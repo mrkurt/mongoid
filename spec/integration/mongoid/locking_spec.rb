@@ -27,18 +27,21 @@ describe Mongoid::Locking do
       before do 
         @post_stale = LockablePost.find(@post.id)
         @post.update_attributes(:title => "Something else")
+
+        begin
+          @post_stale.update_attributes(:title => "Something the same")
+        rescue
+          @error = $!
+        end
+        @post.reload
       end
 
       it "should not save the changes" do
-        @post_stale.update_attributes(:title => "Something the same")
-        @post.reload
         @post.title.should_not == @post_stale.title
       end
 
       it "should raise an exception" do
-        lambda {
-          @post_stale.update_attributes(:title => "Something the same")
-        }.should raise_error
+        @error.should be_a(Mongoid::Errors::NoDocumentsChanged)
       end
     end
   end
