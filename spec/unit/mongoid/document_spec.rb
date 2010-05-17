@@ -321,6 +321,9 @@ describe Mongoid::Document do
         person.attributes[:terms].should be_true
       end
 
+      it "is a new record" do
+        Person.new(@attributes).new_record?.should == true
+      end
     end
 
     context "with a primary key" do
@@ -593,7 +596,7 @@ describe Mongoid::Document do
 
       before do
         @id = BSON::ObjectID.new.to_s
-        @person = Person.new(:_id => @id)
+        @person = Person.instantiate("_id" => @id)
       end
 
       it "returns the id in an array" do
@@ -606,7 +609,7 @@ describe Mongoid::Document do
 
     it "returns the id" do
       id = BSON::ObjectID.new.to_s
-      Person.new(:_id => id).to_param.should == id.to_s
+      Person.instantiate("_id" => id).to_param.should == id.to_s
     end
 
   end
