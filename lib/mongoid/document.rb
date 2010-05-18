@@ -147,8 +147,8 @@ module Mongoid #:nodoc:
       # attrs: The attributes +Hash+ to set up the document with.
       def initialize(attrs = nil)
         @attributes = default_attributes
-        process(attrs ? attrs.except("_id") : attrs)
-        @new_record = true if id.nil?
+        process(attrs)
+        @new_record = true
         document = yield self if block_given?
         identify
       end
@@ -253,7 +253,7 @@ module Mongoid #:nodoc:
         if clear
           @attributes.delete(name)
         else
-          @attributes.insert(name, attrs) unless @attributes.include?(name) && @attributes[name].include?(attrs)
+          @attributes.insert(name, attrs) unless @attributes[name] && @attributes[name].include?(attrs)
         end
         notify
       end
